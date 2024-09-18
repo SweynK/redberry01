@@ -1,11 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Ful from "./Ful";
+import AddListing from "./AddListing";
 import AppLayout from "./ui/AppLayout";
 import Home from "./starter/Home";
 import Error from "./ui/Error";
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import ListingDetail from "./components/ListingDetail";
+import AddAgent from "./components/AddAgent";
 
 const router = createBrowserRouter([
   {
@@ -14,11 +16,18 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+        hildren: [
+          {
+            path: "/listing/:id",
+            element: <ListingDetail />, // Component to render when navigating to /listing/:id
+          },
+        ],
       },
       {
-        path: "/ful",
-        element: <Ful />,
+        path: "/add-listing",
+        element: <AddListing />,
       },
+
       {
         path: "*", // This matches any path that is not defined above
         element: <Error />, // Render the Error component for unknown routes

@@ -4,9 +4,9 @@ import { Outlet } from "react-router-dom";
 
 export default function AppLayout() {
   return (
-    <div>
+    <div className=" w-full">
       <Header />
-      <main>
+      <main className="pt-[77px] max-w-[1596px] mx-auto ">
         <Outlet />
       </main>
     </div>
