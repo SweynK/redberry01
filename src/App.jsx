@@ -16,18 +16,15 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
-        hildren: [
-          {
-            path: "/listing/:id",
-            element: <ListingDetail />, // Component to render when navigating to /listing/:id
-          },
-        ],
+      },
+      {
+        path: "/listing/:id",
+        element: <ListingDetail />, // Component to render when navigating to /listing/:id
       },
       {
         path: "/add-listing",
         element: <AddListing />,
       },
-
       {
         path: "*", // This matches any path that is not defined above
         element: <Error />, // Render the Error component for unknown routes

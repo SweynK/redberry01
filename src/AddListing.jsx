@@ -12,6 +12,8 @@ import {
 } from "@mantine/core";
 import { Link } from "react-router-dom";
 
+// import checkIcon from "./assets/check.svg";
+
 const listingTypes = [
   { value: "0", label: "იყიდება" },
   { value: "1", label: "ქირავდება" },
@@ -53,8 +55,8 @@ export default function AddListing() {
         value.split(" ").length < 5
           ? "აღწერა უნდა შეიცავდეს მინიმუმ 5 სიტყვას"
           : null,
-      region: (value) => (value ? null : "გთხოვთ აირჩიოთ რეგიონი"),
-      city: (value) => (value ? null : "გთხოვთ აირჩიოთ ქალაქი"),
+      // region: (value) => (value ? null : "გთხოვთ აირჩიოთ რეგიონი"),
+      // city: (value) => (value ? null : "გთხოვთ აირჩიოთ ქალაქი"),
       image: (value) => (!value ? "გთხოვთ ატვირთოთ სურათი" : null),
     },
   });
@@ -109,6 +111,12 @@ export default function AddListing() {
 
   const handleSubmit = async (values) => {
     try {
+      const validation = form.validate();
+      if (validation.hasErrors) {
+        console.log("Form validation failed:", validation.errors);
+        return;
+      }
+
       // Create a new FormData object
       const formData = new FormData();
 
@@ -136,7 +144,7 @@ export default function AddListing() {
           },
         }
       );
-
+      console.log(response);
       if (!response.ok) {
         throw new Error("Something went wrong with the API request");
       }

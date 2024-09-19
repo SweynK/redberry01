@@ -7,6 +7,9 @@ import {
   Text,
   NumberInput,
   Modal,
+  TextInput,
+  FileInput,
+  Loader,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -16,6 +19,8 @@ import FilteredItem from "./FilteredItem"; // Import the new component
 // import downArror from "../assets/arrows/down-arrow.png";
 
 import { Link } from "react-router-dom";
+import { useForm } from "@mantine/form";
+import axios from "axios";
 
 const API_URL =
   "https://api.real-estate-manager.redberryinternship.ge/api/real-estates";
@@ -34,45 +39,99 @@ function FormList() {
   const [maxPrice, setMaxPrice] = useState(null); // Maximum price
   const [bedrooms, setBedrooms] = useState(null); // Number of bedrooms
   const [filteredData, setFilteredData] = useState([]); // State for filtered data
+  const [unfilteredData, setUnfilteredData] = useState([]); // State for unfiltered data
+
+  const [loading, setLoading] = useState(true); // Loading state
 
   const [regions, setRegions] = useState([]);
 
   // Modal state and form handling
   const [opened, { open, close }] = useDisclosure(false);
 
-  //   const form = useForm({
-  //     initialValues: {
-  //       name: "",
-  //       surname: "",
-  //       email: "",
-  //       avatar: null,
-  //       phone: "",
-  //     },
-  //     validate: {
-  //       name: (value) =>
-  //         value.length < 2
-  //           ? "Name is required and must be at least 2 characters long"
-  //           : null,
-  //       surname: (value) =>
-  //         value.length < 2
-  //           ? "Surname is required and must be at least 2 characters long"
-  //           : null,
-  //       email: (value) =>
-  //         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-  //           ? "Invalid email format"
-  //           : null,
-  //       avatar: (value) => (value === null ? "Avatar is required" : null),
-  //       phoneNumber: (value) =>
-  //         !/^5\d{8}$/.test(value)
-  //           ? "Phone number must be numeric and in format 5XXXXXXXX"
-  //           : null,
-  //     },
-  //   });
+  const form = useForm({
+    initialValues: {
+      name: "",
+      surname: "",
+      email: "",
+      avatar: null,
+      phone: "",
+    },
+    validate: {
+      name: (value) =>
+        value.length < 2
+          ? "Name is required and must be at least 2 characters long"
+          : null,
+      surname: (value) =>
+        value.length < 2
+          ? "Surname is required and must be at least 2 characters long"
+          : null,
+      email: (value) =>
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+          ? "Invalid email format"
+          : null,
+      avatar: (value) => (value === null ? "Avatar is required" : null),
+      phone: (value) =>
+        !/^5\d{8}$/.test(value)
+          ? "Phone number must be numeric and in format 5XXXXXXXX"
+          : null,
+    },
+  });
+  const handleSubmit = async (values) => {
+    // Prepare form data for submission
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("surname", values.surname);
+    formData.append("email", values.email);
+    formData.append("avatar", values.avatar);
+    formData.append("phone", values.phone);
 
-  //   const handleSubmit = (values) => {
-  //     // Implement your submission logic here
-  //     console.log(values);
-  //   };
+    console.log("Phone Number: ", values.phone);
+
+    try {
+      const response = await axios.post(
+        "https://api.real-estate-manager.redberryinternship.ge/api/agents",
+        formData,
+        {
+          headers: {
+            Authorization: "Bearer 9d069399-3db0-42ac-a2fd-28aa276e5c95",
+          },
+        }
+      );
+
+      console.log("Response: ", response);
+
+      // Make the API request
+      // const response = await fetch(
+      // 	'https://api.real-estate-manager.redberryinternship.ge/api/agents',
+      // 	{
+      // 		method: 'POST',
+      // 		body: formData,
+      // 		headers: {
+      // 			Authorization: 'Bearer 9d069399-3db0-42ac-a2fd-28aa276e5c95',
+      // 		},
+      // 	},
+      // );
+
+      // const data = await response.json();
+      // console.log(response.status, data);
+      // console.log('Response: ', response);
+
+      // // Check if the response is ok
+      // if (!response.ok) {
+      // 	// Extract and log the error details
+      // 	const errorData = await response.json();
+      // 	console.error('Error:', errorData);
+      // 	return;
+      // }
+
+      // Process the success response
+      // const data = await response.json();
+      // console.log('Success:', data);
+    } catch (error) {
+      // Handle any unexpected errors
+      console.error("Error:", error);
+    }
+  };
 
   // Fetch regions
   useEffect(() => {
@@ -91,6 +150,7 @@ function FormList() {
   //fetch estate data
   useEffect(() => {
     const fetchRealEstateData = async () => {
+      setLoading(true); // Set loading to true before starting fetch
       try {
         const response = await fetch(API_URL, {
           headers: {
@@ -98,9 +158,12 @@ function FormList() {
           },
         });
         const data = await response.json();
+        setUnfilteredData(data);
         setFilteredData(data);
       } catch (error) {
         console.error("Error fetching real estate data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetch completes
       }
     };
 
@@ -118,7 +181,7 @@ function FormList() {
 
   // Filter function to be applied in each popover's button
   const ApplyFilter = () => {
-    const filtered = filteredData.filter((item) => {
+    const filtered = unfilteredData.filter((item) => {
       // Filter by region
       const regionFilter =
         selectedRegions.length === 0 ||
@@ -347,55 +410,83 @@ function FormList() {
               opened={opened}
               onClose={close}
               withCloseButton={false}
-              size="lg"
+              c={"#021526"}
+              size="1000px"
             >
-              {/* <form
+              <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmit(form.values);
                 }}
               >
-                <TextInput
-                  label="სახელი"
-                  {...form.getInputProps("name")}
-                  required
-                />
-                <TextInput
-                  label="გვარი"
-                  {...form.getInputProps("surname")}
-                  required
-                />
-                <TextInput
-                  label="ელ-ფოსტა"
-                  {...form.getInputProps("email")}
-                  required
-                />
-                <FileInput
-                  label="ავატარი"
-                  {...form.getInputProps("avatar")}
-                  required
-                />
-                <TextInput
-                  label="ტელ-ნომერი"
-                  {...form.getInputProps("phoneNumber")}
-                  required
-                />
-                <Box className="flex justify-end gap-[15px] pt-[20px]">
-                  <Link to="/">
-                    <Text className="text-[16px] text-[#F93B1D] font-[500] border inline-block mb-[100px] border-[#F93B1D] rounded-[10px] py-[5px] px-[16px]">
+                <Text size="32px" fw={500} ta="center" pt={87} pb={61}>
+                  აგენტის დამატება
+                </Text>
+                <Box className="flex flex-col  items-center">
+                  <SimpleGrid cols={2} w={800}>
+                    <TextInput
+                      label="სახელი"
+                      labelProps={{
+                        className: "pb-[5px]",
+                      }}
+                      {...form.getInputProps("name")}
+                      error={form.errors.name}
+                    />
+                    <TextInput
+                      label="გვარი"
+                      labelProps={{
+                        className: "pb-[5px]",
+                      }}
+                      {...form.getInputProps("surname")}
+                    />
+                    <TextInput
+                      label="ელ-ფოსტა"
+                      labelProps={{
+                        className: "pb-[5px]",
+                      }}
+                      {...form.getInputProps("email")}
+                    />
+
+                    <NumberInput
+                      label="ტელ-ნომერი"
+                      labelProps={{
+                        className: "pb-[5px]",
+                      }}
+                      {...form.getInputProps("phone")}
+                    />
+                  </SimpleGrid>
+                  <FileInput
+                    classNames={{
+                      input:
+                        "h-[135px] w-[800px]   border-2 border-dashed rounded-[8px]",
+                    }}
+                    label="ატვირთეთ ფოტო"
+                    labelProps={{
+                      className: "pt-[28px] pb-[5px] ",
+                    }}
+                    {...form.getInputProps("avatar")}
+                  />
+                  <Box className="flex w-[800px] justify-end items-end  mt-auto gap-[15px] pt-[91px]">
+                    <Button
+                      variant="outline"
+                      color="#F93B1D"
+                      radius="10px"
+                      className="text-[16px]"
+                      onClick={close}
+                    >
                       გაუქმება
-                    </Text>
-                  </Link>
-                  <Button
-                    type="submit"
-                    color="#F93B1D"
-                    radius="10px"
-                    className="text-[16px]"
-                  >
-                    დაამატე აგენტი
-                  </Button>
+                    </Button>
+                    <Button
+                      type="submit"
+                      color="#F93B1D"
+                      radius="10px"
+                      className="text-[16px]"
+                    >
+                      დაამატე აგენტი
+                    </Button>
+                  </Box>
                 </Box>
-              </form> */}
+              </form>
             </Modal>
 
             <Button
@@ -411,10 +502,18 @@ function FormList() {
         {/* Display the filtered results */}
       </Box>
       <Box className="mt-[24px] flex gap-[16px] flex-wrap">
-        {filteredData.length > 0 ? (
-          filteredData.map((item) => <FilteredItem key={item.id} item={item} />)
+        {loading ? (
+          <Box className="flex justify-center items-center w-full h-full">
+            <Loader size={50} type="dots" />
+          </Box>
+        ) : filteredData.length === 0 ? (
+          <Box className="flex justify-center items-center w-full h-full">
+            <Text size="lg" fw={500} align="center">
+              აღნიშნული მონაცემებით განცხადება არ იძებნება
+            </Text>
+          </Box>
         ) : (
-          <Text>No items found for selected filters.</Text>
+          filteredData.map((item) => <FilteredItem key={item.id} item={item} />)
         )}
       </Box>
     </Box>
