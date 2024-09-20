@@ -40,6 +40,7 @@ function FormList() {
   const [maxPrice, setMaxPrice] = useState(null); // Maximum price
   const [bedrooms, setBedrooms] = useState(null); // Number of bedrooms
   const [filteredData, setFilteredData] = useState([]); // State for filtered data
+
   const [unfilteredData, setUnfilteredData] = useState([]); // State for unfiltered data
 
   const [loading, setLoading] = useState(true); // Loading state
@@ -262,12 +263,14 @@ function FormList() {
                     placeholder="დან"
                     hideControls={true}
                     onChange={(value) => setMinPrice(value)}
+                    rightSection={<Text size="sm">₾</Text>}
                   />
                   <NumberInput
                     value={maxPrice}
                     placeholder="დან"
                     hideControls={true}
                     onChange={(value) => setMaxPrice(value)}
+                    rightSection={<Text size="sm">₾</Text>}
                   />
                 </Box>
                 <Button
@@ -310,11 +313,13 @@ function FormList() {
                     value={minArea}
                     hideControls={true}
                     onChange={(value) => setMinArea(value)}
+                    rightSection={<Text size="sm">მ²</Text>}
                   />
                   <NumberInput
                     value={maxArea}
                     hideControls={true}
                     onChange={(value) => setMaxArea(value)}
+                    rightSection={<Text size="sm">მ²</Text>}
                   />
                 </Box>
                 <Button

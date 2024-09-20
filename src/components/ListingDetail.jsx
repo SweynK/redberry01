@@ -132,16 +132,27 @@ export default function ListingDetail() {
       <Box pt={52}>
         <Carousel
           withIndicators
-          height={200}
+          height={400}
           slideSize="33.333333%"
           slideGap="md"
-          loop
           align="start"
           slidesToScroll={3}
         >
-          <Carousel.Slide>1</Carousel.Slide>
-          <Carousel.Slide>2</Carousel.Slide>
-          <Carousel.Slide>3</Carousel.Slide>
+          <Carousel.Slide>
+            <Image src={test} />
+          </Carousel.Slide>
+          <Carousel.Slide>
+            <Image src={test} />
+          </Carousel.Slide>
+          <Carousel.Slide>
+            <Image src={test} />
+          </Carousel.Slide>
+          <Carousel.Slide>
+            <Image src={test} />
+          </Carousel.Slide>
+          <Carousel.Slide>
+            <Image src={test} />
+          </Carousel.Slide>
         </Carousel>
       </Box>
     </Box>

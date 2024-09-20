@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AddListing from "./AddListing";
 import AppLayout from "./ui/AppLayout";
