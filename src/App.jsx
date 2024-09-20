@@ -7,7 +7,6 @@ import Error from "./ui/Error";
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
 import ListingDetail from "./components/ListingDetail";
-import AddAgent from "./components/AddAgent";
 
 const router = createBrowserRouter([
   {

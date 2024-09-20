@@ -9,10 +9,11 @@ import {
   Textarea,
   Button,
   FileInput,
+  Image,
 } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-// import checkIcon from "./assets/check.svg";
+import checkIcon from "./assets/check.svg";
 
 const listingTypes = [
   { value: "0", label: "იყიდება" },
@@ -24,6 +25,8 @@ export default function AddListing() {
   const [cities, setCities] = useState([]);
   const [filteredCities, setFilteredCities] = useState([]);
   const [agents, setAgents] = useState([]);
+  const navigate = useNavigate();
+  ///
 
   const form = useForm({
     initialValues: {
@@ -43,23 +46,27 @@ export default function AddListing() {
     validate: {
       address: (value) =>
         value.length < 2 ? "მისამართი უნდა იყოს მინიმუმ 2 სიმბოლო" : null,
-      zip_code: (value) =>
-        isNaN(value) ? "საფოსტო ინდექსი უნდა იყოს რიცხვი" : null,
-      price: (value) => (isNaN(value) ? "ფასი უნდა იყოს რიცხობრივი" : null),
-      area: (value) => (isNaN(value) ? "ფართობი უნდა იყოს რიცხობრივი" : null),
+      zip_code: (value) => {
+        if (!/^\d+$/.test(value)) return "საფოსტო ინდექსი უნდა იყოს რიცხვი";
+        return null;
+      },
+      price: (value) => (value ? null : "ფასი უნდა იყოს რიცხობრივი"),
+      area: (value) => (value ? null : "ფართობი უნდა იყოს რიცხობრივი"),
       bedrooms: (value) =>
-        !Number.isInteger(Number(value))
-          ? "საძინებლების რაოდენობა უნდა იყოს მთელი რიცხვი"
-          : null,
+        value && Number.isInteger(value)
+          ? null
+          : "საძინებლების რაოდენობა უნდა იყოს მთელი რიცხვი",
       description: (value) =>
         value.split(" ").length < 5
           ? "აღწერა უნდა შეიცავდეს მინიმუმ 5 სიტყვას"
           : null,
-      // region: (value) => (value ? null : "გთხოვთ აირჩიოთ რეგიონი"),
-      // city: (value) => (value ? null : "გთხოვთ აირჩიოთ ქალაქი"),
+      region_id: (value) => (value ? null : "გთხოვთ აირჩიოთ რეგიონი"),
+      city_id: (value) => (value ? null : "გთხოვთ აირჩიოთ ქალაქი"),
       image: (value) => (!value ? "გთხოვთ ატვირთოთ სურათი" : null),
+      agent_id: (value) => (value ? null : "გთხოვთ აირჩიოთ აგენტი"),
     },
   });
+  //////
 
   const fetchRegionsAndCities = useCallback(async () => {
     try {
@@ -151,6 +158,9 @@ export default function AddListing() {
 
       const data = await response.json();
       console.log("Successfully submitted:", data);
+
+      //redirect to homepage
+      navigate("/");
     } catch (error) {
       console.error("Error submitting the form:", error);
     }
@@ -197,14 +207,33 @@ export default function AddListing() {
               მდებარეობა
             </Text>
             <SimpleGrid spacing={20} cols={2} pt={22}>
-              <TextInput
-                label="მისამართი"
-                labelProps={{
-                  className: "text-[14px] text-[#021526] font-[500]",
-                }}
-                {...form.getInputProps("address")}
-              />
-              <TextInput label="ZIP Code" {...form.getInputProps("zip_code")} />
+              <Box>
+                <TextInput
+                  label="მისამართი"
+                  labelProps={{
+                    className: "text-[14px] text-[#021526] font-[500]",
+                  }}
+                  {...form.getInputProps("address")}
+                />
+                {!form.errors.address && (
+                  <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                    <Image w={10} h={10} src={checkIcon} />
+                    მინიმუმ ორი სიმბოლო
+                  </Text>
+                )}
+              </Box>
+              <Box>
+                <TextInput
+                  label="საფოსტო ინდექსი"
+                  {...form.getInputProps("zip_code")}
+                />
+                {!form.errors.zip_code && (
+                  <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                    <Image w={10} h={10} src={checkIcon} />
+                    მხოლოდ რიცხვები
+                  </Text>
+                )}
+              </Box>
               <Select
                 label="რეგიონი"
                 data={regions.map((region) => ({
@@ -230,32 +259,64 @@ export default function AddListing() {
               ბინის დეტალები
             </Text>
             <SimpleGrid spacing={20} cols={2} pt={22}>
-              <NumberInput
-                hideControls={true}
-                label="ფასი"
-                {...form.getInputProps("price")}
-              />
-              <NumberInput
-                hideControls={true}
-                label="ფართობი"
-                {...form.getInputProps("area")}
-              />
-              <NumberInput
-                label="საძინებლების რაოდენობა"
-                hideControls={true}
-                {...form.getInputProps("bedrooms")}
-              />
+              <Box>
+                <NumberInput
+                  hideControls={true}
+                  label="ფასი"
+                  {...form.getInputProps("price")}
+                />
+                {!form.errors.price && (
+                  <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                    <Image w={10} h={10} src={checkIcon} />
+                    მხოლოდ რიცხვები
+                  </Text>
+                )}
+              </Box>
+              <Box>
+                <NumberInput
+                  hideControls={true}
+                  label="ფართობი"
+                  {...form.getInputProps("area")}
+                />
+                {!form.errors.area && (
+                  <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                    <Image w={10} h={10} src={checkIcon} />
+                    მხოლოდ რიცხვები
+                  </Text>
+                )}
+              </Box>
+              <Box>
+                <NumberInput
+                  label="საძინებლების რაოდენობა"
+                  hideControls={true}
+                  {...form.getInputProps("bedrooms")}
+                />
+                {!form.errors.bedrooms && (
+                  <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                    <Image w={10} h={10} src={checkIcon} />
+                    მხოლოდ რიცხვები
+                  </Text>
+                )}
+              </Box>
             </SimpleGrid>
           </Box>
-          <Textarea
-            pt={20}
-            label="აღწერა"
-            radius={6}
-            classNames={{
-              input: "h-[135px]",
-            }}
-            {...form.getInputProps("description")}
-          />
+          <Box>
+            <Textarea
+              pt={20}
+              label="აღწერა"
+              radius={6}
+              classNames={{
+                input: "h-[135px]",
+              }}
+              {...form.getInputProps("description")}
+            />
+            {!form.errors.description && (
+              <Text className="flex gap-1 pt-1" size="12px" c="#021526">
+                <Image w={10} h={10} src={checkIcon} />
+                მინიმუმ 5 სიტყვა
+              </Text>
+            )}
+          </Box>
           <FileInput
             pt={20}
             label="ატვირთე ფოტო"

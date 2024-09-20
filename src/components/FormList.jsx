@@ -10,13 +10,14 @@ import {
   TextInput,
   FileInput,
   Loader,
+  Image,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import FilteredItem from "./FilteredItem"; // Import the new component
 
-// import downArror from "../assets/arrows/down-arrow.png";
+import checkIcon from "../assets/check.svg";
 
 import { Link } from "react-router-dom";
 import { useForm } from "@mantine/form";
@@ -58,36 +59,36 @@ function FormList() {
     },
     validate: {
       name: (value) =>
-        value.length < 2
-          ? "Name is required and must be at least 2 characters long"
-          : null,
+        value.length < 2 ? "სახელი უნდა იყოს მინიმუმ 2 სიმბოლო" : null,
       surname: (value) =>
-        value.length < 2
-          ? "Surname is required and must be at least 2 characters long"
-          : null,
+        value.length < 2 ? "გვარი უნდა იყოს მინიმუმ 2 სიმბოლო" : null,
       email: (value) =>
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-          ? "Invalid email format"
+          ? "უნდა მთავრდებოდეს @redberry.ge-თ"
           : null,
-      avatar: (value) => (value === null ? "Avatar is required" : null),
+      avatar: (value) => (value === null ? "გთხოვთ ატვირთოთ სურათი" : null),
       phone: (value) =>
-        !/^5\d{8}$/.test(value)
-          ? "Phone number must be numeric and in format 5XXXXXXXX"
-          : null,
+        !/^5\d{8}$/.test(value) ? "უნდა იყოს ფორმატის 5XXXXXXXX" : null,
     },
   });
   const handleSubmit = async (values) => {
-    // Prepare form data for submission
-    const formData = new FormData();
-    formData.append("name", values.name);
-    formData.append("surname", values.surname);
-    formData.append("email", values.email);
-    formData.append("avatar", values.avatar);
-    formData.append("phone", values.phone);
-
-    console.log("Phone Number: ", values.phone);
-
     try {
+      // Validate the form
+      const validation = form.validate();
+      if (validation.hasErrors) {
+        console.log("Form validation failed:", validation.errors);
+        return;
+      }
+
+      // Prepare form data for submission
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("surname", values.surname);
+      formData.append("email", values.email);
+      formData.append("avatar", values.avatar);
+      formData.append("phone", values.phone);
+
+      console.log("Phone Number: ", values.phone);
       const response = await axios.post(
         "https://api.real-estate-manager.redberryinternship.ge/api/agents",
         formData,
@@ -99,34 +100,8 @@ function FormList() {
       );
 
       console.log("Response: ", response);
-
-      // Make the API request
-      // const response = await fetch(
-      // 	'https://api.real-estate-manager.redberryinternship.ge/api/agents',
-      // 	{
-      // 		method: 'POST',
-      // 		body: formData,
-      // 		headers: {
-      // 			Authorization: 'Bearer 9d069399-3db0-42ac-a2fd-28aa276e5c95',
-      // 		},
-      // 	},
-      // );
-
-      // const data = await response.json();
-      // console.log(response.status, data);
-      // console.log('Response: ', response);
-
-      // // Check if the response is ok
-      // if (!response.ok) {
-      // 	// Extract and log the error details
-      // 	const errorData = await response.json();
-      // 	console.error('Error:', errorData);
-      // 	return;
-      // }
-
-      // Process the success response
-      // const data = await response.json();
-      // console.log('Success:', data);
+      // Close the modal upon successful submission
+      close();
     } catch (error) {
       // Handle any unexpected errors
       console.error("Error:", error);
@@ -424,36 +399,87 @@ function FormList() {
                 </Text>
                 <Box className="flex flex-col  items-center">
                   <SimpleGrid cols={2} w={800}>
-                    <TextInput
-                      label="სახელი"
-                      labelProps={{
-                        className: "pb-[5px]",
-                      }}
-                      {...form.getInputProps("name")}
-                      error={form.errors.name}
-                    />
-                    <TextInput
-                      label="გვარი"
-                      labelProps={{
-                        className: "pb-[5px]",
-                      }}
-                      {...form.getInputProps("surname")}
-                    />
-                    <TextInput
-                      label="ელ-ფოსტა"
-                      labelProps={{
-                        className: "pb-[5px]",
-                      }}
-                      {...form.getInputProps("email")}
-                    />
-
-                    <NumberInput
-                      label="ტელ-ნომერი"
-                      labelProps={{
-                        className: "pb-[5px]",
-                      }}
-                      {...form.getInputProps("phone")}
-                    />
+                    <Box>
+                      <TextInput
+                        label="სახელი"
+                        labelProps={{
+                          className: "pb-[5px]",
+                        }}
+                        {...form.getInputProps("name")}
+                        // error={form.errors.name}
+                      />
+                      {!form.errors.name && (
+                        <Text
+                          className="flex gap-1 pt-1"
+                          size="12px"
+                          c="#021526"
+                        >
+                          <Image w={10} h={10} src={checkIcon} />
+                          მინიმუმ ორი სიმბოლო
+                        </Text>
+                      )}
+                    </Box>
+                    <Box>
+                      <TextInput
+                        label="გვარი"
+                        labelProps={{
+                          className: "pb-[5px]",
+                        }}
+                        {...form.getInputProps("surname")}
+                        // error={form.errors.surname}
+                      />
+                      {!form.errors.surname && (
+                        <Text
+                          className="flex gap-1 pt-1"
+                          size="12px"
+                          c="#021526"
+                        >
+                          <Image w={10} h={10} src={checkIcon} />
+                          მინიმუმ ორი სიმბოლო
+                        </Text>
+                      )}
+                    </Box>
+                    <Box>
+                      <TextInput
+                        label="ელ-ფოსტა"
+                        labelProps={{
+                          className: "pb-[5px]",
+                        }}
+                        {...form.getInputProps("email")}
+                        // error={form.errors.email}
+                      />
+                      {!form.errors.email && (
+                        <Text
+                          className="flex gap-1 pt-1"
+                          size="12px"
+                          c="#021526"
+                        >
+                          <Image w={10} h={10} src={checkIcon} />
+                          გამოიყენეთ @redberry.ge ფოსტა
+                        </Text>
+                      )}
+                    </Box>
+                    <Box>
+                      <NumberInput
+                        label="ტელ-ნომერი"
+                        hideControls={true}
+                        labelProps={{
+                          className: "pb-[5px]",
+                        }}
+                        {...form.getInputProps("phone")}
+                        // error={form.errors.phone}
+                      />
+                      {!form.errors.email && (
+                        <Text
+                          className="flex gap-1 pt-1"
+                          size="12px"
+                          c="#021526"
+                        >
+                          <Image w={10} h={10} src={checkIcon} />
+                          მხოლოდ რიცხვები
+                        </Text>
+                      )}
+                    </Box>
                   </SimpleGrid>
                   <FileInput
                     classNames={{
