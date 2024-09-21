@@ -183,7 +183,7 @@ function FormList() {
   };
 
   return (
-    <Box className="flex w-[1596px]  flex-col justify-start gap-[24px] rounded-[10px]">
+    <Box className="flex w-full max-w-[1596px]  flex-col justify-start gap-[24px] rounded-[10px]">
       <Box className="flex justify-between">
         <Box className="flex gap-[8px] justify-between rounded-[10px] border w-[785px]">
           {/* Filter for Region */}
