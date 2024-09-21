@@ -3,7 +3,7 @@ import { Box, Text, Image } from "@mantine/core";
 import { Link } from "react-router-dom";
 import locationIcon from "../assets/location-marker.svg";
 import bedroomIcon from "../assets/bed.svg";
-import sizeIcon from "../assets/vector.svg";
+import sizeIcon from "../assets/Vector.svg";
 import zipCode from "../assets/zip-code.svg";
 
 function FilteredItem({ item }) {
