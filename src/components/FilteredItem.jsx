@@ -42,11 +42,11 @@ function FilteredItem({ item }) {
             </Box>
             <Box className="flex gap-1">
               <Image w={24} h={24} src={sizeIcon}></Image>
-              <Text>{item.bedrooms}</Text>
+              <Text>{item.area}</Text>
             </Box>
             <Box className="flex gap-1">
               <Image w={24} h={24} src={zipCode}></Image>
-              <Text>{item.bedrooms}</Text>
+              <Text>{item.zip_code}</Text>
             </Box>
           </Box>
         </Box>
