@@ -1,5 +1,5 @@
-import { Box, Button, SimpleGrid, Text, Image } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Box, Button, SimpleGrid, Text, Image, Loader } from "@mantine/core";
+import { Link, useParams, useNavigate } from "react-router-dom";
 
 import "@mantine/carousel/styles.css";
 
@@ -10,10 +10,106 @@ import bedIcon from "../assets/bed.svg";
 import zipCodeIcon from "../assets/zip-code.svg";
 import mailIcon from "../assets/gmail-icon.svg";
 import phoneIcon from "../assets/phone-icon.svg";
-import test from "../assets/text.png";
+// import test from "../assets/text.png";
 import { Carousel } from "@mantine/carousel";
+import { useEffect, useState } from "react";
+
+const TOKEN = "9d069399-3db0-42ac-a2fd-28aa276e5c95";
 
 export default function ListingDetail() {
+  const { id } = useParams(); // Get the id from the URL
+  const navigate = useNavigate();
+  const [dataSlider, setDataSlider] = useState([]);
+  const [lists, setLists] = useState([]);
+
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  //fetch estate data and agent
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://api.real-estate-manager.redberryinternship.ge/api/real-estates/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }
+        );
+        const listData = await response.json();
+        setData(listData);
+        console.log(listData);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false); // Set loading to false once the data is fetched
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  //fetch listing for slider
+
+  useEffect(() => {
+    const fecthListing = async () => {
+      try {
+        const response = await fetch(
+          `https://api.real-estate-manager.redberryinternship.ge/api/real-estates/`,
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }
+        );
+        const listingData = await response.json();
+        setLists(listingData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fecthListing();
+  }, []);
+
+  /// filter for slider
+  useEffect(() => {
+    if (data && lists.length > 0) {
+      const filteredListings = lists.filter(
+        (item) => item.city.region_id === data.city.region_id
+      );
+      setDataSlider(filteredListings);
+    }
+  }, [data, lists]);
+
+  // Check if the data is still loading or filtered is undefined
+  if (loading || !data) {
+    return (
+      <Box className="flex justify-center items-center w-full h-full">
+        <Loader size={50} type="dots" />
+      </Box>
+    );
+  }
+
+  //handleDeleteListing
+  const handleDeleteListing = async () => {
+    try {
+      const response = await fetch(
+        `https://api.real-estate-manager.redberryinternship.ge/api/real-estates/${data.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: "Bearer 9d069399-3db0-42ac-a2fd-28aa276e5c95",
+          },
+        }
+      );
+      navigate("/");
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Box w={1591}>
       <Link to="/">
@@ -24,19 +120,19 @@ export default function ListingDetail() {
           <Box>
             <Box w="full" h={670} className="relative overflow-hidden">
               <Image
-                src={test}
+                src={data.image}
                 alt="image"
                 className="w-full h-full object-cover rounded-t-[14px] "
               />
             </Box>
           </Box>
           <Text size="16px" pt={11} c={"#808A93"} ta={"right"}>
-            გამოქვეყნების თარიღი
+            გამოქვეყნების თარიღი: {data.created_at}
           </Text>
         </Box>
         <Box className="flex flex-col">
           <Text size="48px" c={"#021526"} fw={700}>
-            80000 ₾
+            {data.price}
           </Text>
           <Box pt={24} className="flex flex-col gap-4">
             <Text
@@ -45,7 +141,7 @@ export default function ListingDetail() {
               className="flex  items-start gap-[6px]"
             >
               <Image w={22} h={22} src={locationIcon} alt="location-icon" />
-              თბილისი, ი. ჭავჭავაძის 53
+              {data.address}
             </Text>
             <Text
               size="24px"
@@ -53,7 +149,7 @@ export default function ListingDetail() {
               className="flex  items-start gap-[6px]"
             >
               <Image w={22} h={22} src={vectorIcon} alt="location-icon" />
-              ფართი 55
+              {data.area}
             </Text>
             <Text
               size="24px"
@@ -61,7 +157,7 @@ export default function ListingDetail() {
               className="flex  items-start gap-[6px]"
             >
               <Image w={22} h={22} src={bedIcon} alt="location-icon" />
-              საძინებელი 2
+              {data.bedrooms}
             </Text>
             <Text
               size="24px"
@@ -69,12 +165,11 @@ export default function ListingDetail() {
               className="flex  items-start gap-[6px]"
             >
               <Image w={22} h={22} src={zipCodeIcon} alt="location-icon" />
-              საფოსტო ინდექსი 2523
+              {data.zip_code}
             </Text>
           </Box>
           <Text size="16px" c={"#808A93"} pt={40} pb={50} className="leading-6">
-            იყიდება ბინა ჭავჭავაძის ქუჩაზე, ვაკეში. ბინა არის ახალი რემონტით,
-            ორი საძინებლითა და დიდი აივნებით. მოწყობილია ავეჯითა და ტექნიკით.
+            {data.description}
           </Text>
           <Box
             pt={24}
@@ -88,14 +183,14 @@ export default function ListingDetail() {
                 className="relative overflow-hidden rounded-full"
               >
                 <Image
-                  src={test}
+                  src={data.agent.avatar}
                   className="w-full h-full object-cover"
                   alt="agneti"
                 />
               </Box>
               <Box className="flex flex-col gap-1">
                 <Text size="16px" c={"#021526"}>
-                  სოფიო გელოვანი
+                  {data.agent.name}
                 </Text>
                 <Text size="12px" c={"#676E76"}>
                   აგენტი
@@ -105,11 +200,11 @@ export default function ListingDetail() {
             <Box pt={16} c={"#808A93"} className="flex flex-col gap-1">
               <Text size="14px" className="flex gap-[5px]">
                 <Image w={16} h={13} src={mailIcon} alt="mail icon" />
-                sophio.gelovani@redberry.ge
+                {data.agent.email}
               </Text>
               <Text size="14px" className="flex gap-[5px]">
                 <Image w={16} h={16} src={phoneIcon} alt="phone icon" />
-                577 777 777
+                {data.agent.phone}
               </Text>
             </Box>
           </Box>
@@ -120,6 +215,7 @@ export default function ListingDetail() {
               variant="filled"
               color="gray"
               radius="md"
+              onClick={handleDeleteListing}
             >
               ლისტინგის წაშლა
             </Button>
@@ -132,27 +228,54 @@ export default function ListingDetail() {
       <Box pt={52}>
         <Carousel
           withIndicators
-          height={400}
+          height={500}
           slideSize="33.333333%"
           slideGap="md"
           align="start"
           slidesToScroll={3}
         >
-          <Carousel.Slide>
-            <Image src={test} />
-          </Carousel.Slide>
-          <Carousel.Slide>
-            <Image src={test} />
-          </Carousel.Slide>
-          <Carousel.Slide>
-            <Image src={test} />
-          </Carousel.Slide>
-          <Carousel.Slide>
-            <Image src={test} />
-          </Carousel.Slide>
-          <Carousel.Slide>
-            <Image src={test} />
-          </Carousel.Slide>
+          {dataSlider.map((item) => (
+            <Carousel.Slide key={item.id}>
+              <Box className="flex flex-col h-[455px] border border-[#02152680] rounded-md">
+                <Image
+                  src={item.image}
+                  alt={`Image of ${item.address}`}
+                  className="h-[307px] w-full object-cover  rounded-t-md"
+                />
+                <Box className="flex flex-col gap-2 p-4">
+                  <Text className="font-bold text-lg">{item.price} ₾</Text>
+                  <Text className="flex gap-1">
+                    <Image
+                      w={22}
+                      h={22}
+                      src={locationIcon}
+                      alt="location-icon"
+                    />
+                    {item.address}
+                  </Text>
+                  <Box className="flex gap-4">
+                    <Text className="flex gap-1">
+                      <Image w={22} h={22} src={bedIcon} alt="bed-icon" />
+                      {item.bedrooms}
+                    </Text>
+                    <Text className="flex gap-1">
+                      <Image w={22} h={22} src={vectorIcon} alt="area-icon" />
+                      {item.area}
+                    </Text>
+                    <Text className="flex gap-1">
+                      <Image
+                        w={22}
+                        h={22}
+                        src={zipCodeIcon}
+                        alt="zip-code-icon"
+                      />
+                      {item.zip_code}
+                    </Text>
+                  </Box>
+                </Box>
+              </Box>
+            </Carousel.Slide>
+          ))}
         </Carousel>
       </Box>
     </Box>
