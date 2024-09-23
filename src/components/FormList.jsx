@@ -183,7 +183,7 @@ function FormList() {
   };
 
   return (
-    <Box className="flex w-[1596px] mx-auto flex-col gap-[24px] rounded-[10px]">
+    <Box className="w-full desktop:max-w-[1596px] mx-auto flex-col gap-[20px] rounded-[10px]">
       <Box className="flex justify-between">
         <Box className="flex gap-[8px] justify-between rounded-[10px] border w-[785px]">
           {/* Filter for Region */}
@@ -532,7 +532,7 @@ function FormList() {
         </Box>
         {/* Display the filtered results */}
       </Box>
-      <Box className="mt-[24px] flex gap-[16px] flex-wrap">
+      <Box className="mt-[24px] flex gap-[18px] flex-wrap">
         {loading ? (
           <Box className="flex justify-center items-center w-full h-full">
             <Loader size={50} type="dots" />

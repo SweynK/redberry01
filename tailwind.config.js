@@ -6,6 +6,9 @@ export default {
       colors: {
         lightGray: "#DBDBDB", // Custom color for the border
       },
+      screens: {
+        desktop: "1920px", // Setting a custom screen size for large desktops
+      },
     },
   },
   plugins: [],
