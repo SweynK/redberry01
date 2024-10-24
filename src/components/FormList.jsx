@@ -11,6 +11,7 @@ import {
   FileInput,
   Loader,
   Image,
+  Flex,
 } from "@mantine/core";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -146,6 +147,32 @@ function FormList() {
     fetchRealEstateData();
   }, []);
 
+  // Load filters from localStorage on mount
+  // useEffect(() => {
+  //   const savedFilters = JSON.parse(localStorage.getItem("filters"));
+  //   if (savedFilters) {
+  //     setSelectedRegions(savedFilters.selectedRegions || []);
+  //     setMinArea(savedFilters.minArea || null);
+  //     setMaxArea(savedFilters.maxArea || null);
+  //     setMinPrice(savedFilters.minPrice || null);
+  //     setMaxPrice(savedFilters.maxPrice || null);
+  //     setBedrooms(savedFilters.bedrooms || null);
+  //   }
+  // }, []);
+
+  // // Save filters to localStorage
+  // const saveFiltersToLocalStorage = () => {
+  //   const filters = {
+  //     selectedRegions,
+  //     minArea,
+  //     maxArea,
+  //     minPrice,
+  //     maxPrice,
+  //     bedrooms,
+  //   };
+  //   localStorage.setItem("filters", JSON.stringify(filters));
+  // };
+
   // Handle region selection
   const handleCheckboxChange = (regionId) => {
     setSelectedRegions((prev) =>
@@ -180,204 +207,446 @@ function FormList() {
     });
 
     setFilteredData(filtered);
+    console.log(regions);
+    // saveFiltersToLocalStorage(); // Save filters after applying
   };
+
+  /// showing picked filters
+
+  const filteredRegions = regions.filter((region) =>
+    selectedRegions.includes(region.id)
+  );
 
   return (
     <Box className="w-full desktop:max-w-[1596px] mx-auto flex-col gap-[20px] rounded-[10px]">
       <Box className="flex justify-between">
-        <Box className="flex gap-[8px] justify-between rounded-[10px] border w-[785px]">
-          {/* Filter for Region */}
-          <Popover
-            opened={openedRegion}
-            onChange={setOpenedRegion}
-            position="bottom-start"
-          >
-            <Popover.Target>
-              <Button
-                variant="subtle"
-                color="white"
-                radius={6}
-                onClick={() => setOpenedRegion(true)}
-              >
-                <Text fw={600} size="16px" c="black">
-                  რეგიონი
-                </Text>
-              </Button>
-            </Popover.Target>
-            <Popover.Dropdown className="flex flex-col h-auto p-6 ovwerflow-auto ">
-              <Box w={730} className="flex-1 ">
-                <SimpleGrid cols={3} verticalSpacing={16}>
-                  {regions.map((region) => (
-                    <Box
-                      key={region.id}
-                      className="flex w-40 items-center gap-[8px]"
-                    >
-                      <Checkbox
-                        color="#45A849"
-                        checked={selectedRegions.includes(region.id)}
-                        onChange={() => handleCheckboxChange(region.id)}
-                      />
-                      <Text>{region.name}</Text>
+        <Box>
+          <Box className="flex gap-[8px] justify-between rounded-[10px] border w-[785px]">
+            {/* Filter for Region */}
+            <Popover
+              opened={openedRegion}
+              onChange={setOpenedRegion}
+              position="bottom-start"
+            >
+              <Popover.Target>
+                <Button
+                  variant="subtle"
+                  color="white"
+                  radius={6}
+                  onClick={() => setOpenedRegion(true)}
+                >
+                  <Text fw={600} size="16px" c="black">
+                    რეგიონი
+                  </Text>
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown className="flex flex-col h-auto p-6 ovwerflow-auto ">
+                <Box w={730} className="flex-1 ">
+                  <SimpleGrid cols={3} verticalSpacing={16}>
+                    {regions.map((region) => (
+                      <Box
+                        key={region.id}
+                        className="flex w-44 items-center gap-[8px]"
+                      >
+                        <Checkbox
+                          color="#45A849"
+                          checked={selectedRegions.includes(region.id)}
+                          onChange={() => handleCheckboxChange(region.id)}
+                        />
+                        <Text>{region.name}</Text>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                </Box>
+                <Button
+                  onClick={() => {
+                    ApplyFilter();
+                    setOpenedRegion(false);
+                  }}
+                  className="self-end mt-4" // Position the button at the end of the flex container
+                  color="#F93B1D"
+                  radius={8}
+                >
+                  არჩევა
+                </Button>
+              </Popover.Dropdown>
+            </Popover>
+
+            {/* Filter for Price */}
+            <Popover
+              opened={openedPrice}
+              onChange={setOpenedPrice}
+              position="bottom-start"
+            >
+              <Popover.Target>
+                <Button
+                  variant="subtle"
+                  color="white"
+                  radius={6}
+                  onClick={() => setOpenedPrice(true)}
+                >
+                  <Text fw={600} size="16px" c="black">
+                    საფასო კატეგორია
+                  </Text>
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box w={334} p={24}>
+                  <Text fw={700} c="#021526">
+                    ფასის მიხედვით
+                  </Text>
+                  <Box className="flex gap-[15px] py-6">
+                    <NumberInput
+                      value={minPrice}
+                      placeholder="დან"
+                      hideControls={true}
+                      onChange={(value) => setMinPrice(value)}
+                      rightSection={<Text size="sm">₾</Text>}
+                    />
+                    <NumberInput
+                      value={maxPrice}
+                      placeholder="მდე"
+                      hideControls={true}
+                      onChange={(value) => setMaxPrice(value)}
+                      rightSection={<Text size="sm">₾</Text>}
+                    />
+                  </Box>
+                  {/* Predefined price variants */}
+                  <Box className="flex  justify-between py-2">
+                    <Box className="flex flex-col gap-2">
+                      <Text fw={700} c="#021526">
+                        მინ.ფასი
+                      </Text>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinPrice(20000);
+                        }}
+                      >
+                        20,000₾
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinPrice(40000);
+                        }}
+                      >
+                        40,000₾
+                      </Button>
+
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinPrice(60000);
+                        }}
+                      >
+                        60,000₾
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinPrice(80000);
+                        }}
+                      >
+                        80,000₾
+                      </Button>
                     </Box>
-                  ))}
-                </SimpleGrid>
-              </Box>
-              <Button
-                onClick={() => {
-                  ApplyFilter();
-                  setOpenedRegion(false);
-                }}
-                className="self-end mt-4" // Position the button at the end of the flex container
-                color="#F93B1D"
-                radius={8}
-              >
-                არჩევა
-              </Button>
-            </Popover.Dropdown>
-          </Popover>
-
-          {/* Filter for Price */}
-          <Popover
-            opened={openedPrice}
-            onChange={setOpenedPrice}
-            position="bottom-start"
-          >
-            <Popover.Target>
-              <Button
-                variant="subtle"
-                color="white"
-                radius={6}
-                onClick={() => setOpenedPrice(true)}
-              >
-                <Text fw={600} size="16px" c="black">
-                  საფასო კატეგორია
-                </Text>
-              </Button>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Box w={334} p={24}>
-                <Text c="#021526">ფასის მიხედვით</Text>
-                <Box className="flex gap-[15px] py-6">
-                  <NumberInput
-                    value={minPrice}
-                    placeholder="დან"
-                    hideControls={true}
-                    onChange={(value) => setMinPrice(value)}
-                    rightSection={<Text size="sm">₾</Text>}
-                  />
-                  <NumberInput
-                    value={maxPrice}
-                    placeholder="დან"
-                    hideControls={true}
-                    onChange={(value) => setMaxPrice(value)}
-                    rightSection={<Text size="sm">₾</Text>}
-                  />
+                    <Box className="flex flex-col gap-2">
+                      <Text fw={700} c="#021526">
+                        მაქს.ფასი
+                      </Text>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxPrice(20000);
+                        }}
+                      >
+                        20,000₾
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxPrice(40000);
+                        }}
+                      >
+                        40,000₾
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxPrice(60000);
+                        }}
+                      >
+                        60,000₾
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxPrice(80000);
+                        }}
+                      >
+                        80,000₾
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Box pt={20} className="flex justify-end">
+                    <Button
+                      onClick={() => {
+                        ApplyFilter();
+                        setOpenedPrice(false);
+                      }}
+                      className=""
+                      color="#F93B1D"
+                      radius={8}
+                    >
+                      არჩევა
+                    </Button>
+                  </Box>
                 </Box>
+              </Popover.Dropdown>
+            </Popover>
+            {/* Filter for Area */}
+            <Popover
+              opened={openedArea}
+              onChange={setOpenedArea}
+              position="bottom-start"
+            >
+              <Popover.Target>
                 <Button
-                  onClick={() => {
-                    ApplyFilter();
-                    setOpenedPrice(false);
-                  }}
-                  className="self-left"
-                  color="#F93B1D"
-                  radius={8}
+                  variant="subtle"
+                  color="white"
+                  radius={6}
+                  onClick={() => setOpenedArea(true)}
                 >
-                  არჩევა
+                  <Text fw={600} size="16px" c="black">
+                    ფართობი
+                  </Text>
                 </Button>
-              </Box>
-            </Popover.Dropdown>
-          </Popover>
-          {/* Filter for Area */}
-          <Popover
-            opened={openedArea}
-            onChange={setOpenedArea}
-            position="bottom-start"
-          >
-            <Popover.Target>
-              <Button
-                variant="subtle"
-                color="white"
-                radius={6}
-                onClick={() => setOpenedArea(true)}
-              >
-                <Text fw={600} size="16px" c="black">
-                  ფართობი
-                </Text>
-              </Button>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Box w={334} p={24}>
-                <Text c="#021526">ფართობის მიხედვით</Text>
-                <Box className="flex gap-[15px] py-6">
-                  <NumberInput
-                    value={minArea}
-                    hideControls={true}
-                    onChange={(value) => setMinArea(value)}
-                    rightSection={<Text size="sm">მ²</Text>}
-                  />
-                  <NumberInput
-                    value={maxArea}
-                    hideControls={true}
-                    onChange={(value) => setMaxArea(value)}
-                    rightSection={<Text size="sm">მ²</Text>}
-                  />
-                </Box>
-                <Button
-                  onClick={() => {
-                    ApplyFilter();
-                    setOpenedArea(false);
-                  }}
-                  className="self-end"
-                  color="#F93B1D"
-                  radius={8}
-                >
-                  არჩევა
-                </Button>
-              </Box>
-            </Popover.Dropdown>
-          </Popover>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box w={334} p={24}>
+                  <Text fw={700} c="#021526">
+                    ფართობის მიხედვით
+                  </Text>
+                  <Box className="flex gap-[15px] py-6">
+                    <NumberInput
+                      value={minArea}
+                      hideControls={true}
+                      onChange={(value) => setMinArea(value)}
+                      rightSection={<Text size="sm">მ²</Text>}
+                    />
+                    <NumberInput
+                      value={maxArea}
+                      hideControls={true}
+                      onChange={(value) => setMaxArea(value)}
+                      rightSection={<Text size="sm">მ²</Text>}
+                    />
+                  </Box>
+                  <Box className="flex  justify-between py-2">
+                    <Box className="flex flex-col gap-2">
+                      <Text fw={700} c="#021526">
+                        მინ.მ²
+                      </Text>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinArea(20000);
+                        }}
+                      >
+                        20,000 მ²
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinArea(40000);
+                        }}
+                      >
+                        40,000 მ²
+                      </Button>
 
-          {/* Filter for Bedrooms */}
-          <Popover
-            opened={openedBedrooms}
-            onChange={setOpenedBedrooms}
-            position="bottom-start"
-          >
-            <Popover.Target>
-              <Button
-                variant="subtle"
-                color="white"
-                radius={6}
-                onClick={() => setOpenedBedrooms(true)}
-              >
-                <Text fw={600} size="16px" c="black">
-                  საძინებლების რაოდენობა
-                </Text>
-              </Button>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Box w={300} p={24} className="gap-6 flex flex-col">
-                <Text c="#021526">საძინებლების რაოდენობა</Text>
-                <NumberInput
-                  value={bedrooms}
-                  hideControls={true}
-                  onChange={(value) => setBedrooms(Number(value))}
-                  className="w-[41px]"
-                />
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinArea(60000);
+                        }}
+                      >
+                        60,000 მ²
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMinArea(80000);
+                        }}
+                      >
+                        80,000 მ²
+                      </Button>
+                    </Box>
+                    <Box className="flex flex-col gap-2">
+                      <Text fw={700} c="#021526">
+                        მაქს.მ²
+                      </Text>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxArea(20000);
+                        }}
+                      >
+                        20,000 მ²
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxArea(40000);
+                        }}
+                      >
+                        40,000 მ²
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxArea(60000);
+                        }}
+                      >
+                        60,000 მ²
+                      </Button>
+                      <Button
+                        variant="default"
+                        color="#021526"
+                        radius={8}
+                        onClick={() => {
+                          setMaxArea(80000);
+                        }}
+                      >
+                        80,000 მ²
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Box pt={20} className="flex justify-end">
+                    <Button
+                      onClick={() => {
+                        ApplyFilter();
+                        setOpenedArea(false);
+                      }}
+                      className="self-end"
+                      color="#F93B1D"
+                      radius={8}
+                    >
+                      არჩევა
+                    </Button>
+                  </Box>
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
+
+            {/* Filter for Bedrooms */}
+            <Popover
+              opened={openedBedrooms}
+              onChange={setOpenedBedrooms}
+              position="bottom-start"
+            >
+              <Popover.Target>
                 <Button
-                  onClick={() => {
-                    ApplyFilter();
-                    setOpenedBedrooms(false);
-                  }}
-                  className="self-end"
-                  color="#F93B1D"
-                  radius={8}
+                  variant="subtle"
+                  color="white"
+                  radius={6}
+                  onClick={() => setOpenedBedrooms(true)}
                 >
-                  არჩევა
+                  <Text fw={600} size="16px" c="black">
+                    საძინებლების რაოდენობა
+                  </Text>
                 </Button>
-              </Box>
-            </Popover.Dropdown>
-          </Popover>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Box w={300} p={24} className="gap-6 flex flex-col">
+                  <Text c="#021526">საძინებლების რაოდენობა</Text>
+                  <NumberInput
+                    value={bedrooms}
+                    hideControls={true}
+                    onChange={(value) => setBedrooms(Number(value))}
+                    className="w-[41px]"
+                  />
+                  <Button
+                    onClick={() => {
+                      ApplyFilter();
+                      setOpenedBedrooms(false);
+                    }}
+                    className="self-end"
+                    color="#F93B1D"
+                    radius={8}
+                  >
+                    არჩევა
+                  </Button>
+                </Box>
+              </Popover.Dropdown>
+            </Popover>
+          </Box>
+          <Flex ml={5} c={"#021526B2"} mih={40} align="end" gap="xs">
+            {filteredRegions.map((region) => (
+              <Text
+                className="flex gap-2 border rounded-xl px-2"
+                key={region.id}
+              >
+                {region.name}
+                <Text size="md" className="cursor-pointer">
+                  x
+                </Text>
+              </Text>
+            ))}
+            {minPrice !== null && maxPrice !== null && (
+              <Text className="flex gap-2 border rounded-xl px-2">
+                {`${minPrice} ₾ - ${maxPrice} ₾`}
+                <Text size="md" className="cursor-pointer">
+                  x
+                </Text>
+              </Text>
+            )}
+            {minArea !== null && maxArea !== null && (
+              <Text className="flex gap-2 border rounded-xl px-2">
+                {`${minArea} მ² - ${maxArea} მ²`}
+                <Text size="md" className="cursor-pointer">
+                  x
+                </Text>
+              </Text>
+            )}
+            {bedrooms !== null && (
+              <Text className="flex gap-2 border rounded-xl px-2">
+                {`${bedrooms}`}
+                <Text size="md" className="cursor-pointer">
+                  x
+                </Text>
+              </Text>
+            )}
+          </Flex>
         </Box>
         <Box className="flex gap-4">
           <Link to="/add-listing">

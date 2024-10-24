@@ -325,9 +325,22 @@ export default function AddListing() {
             classNames={{
               input: "h-[135px]  border-2 border-dashed rounded-[8px]",
             }}
+            onChange={(file) => {
+              // Check if the file size is less than or equal to 1 MB (1 * 1024 * 1024 bytes)
+              const maxSizeInBytes = 1 * 1024 * 1024;
+              if (file && file.size > maxSizeInBytes) {
+                alert(
+                  "The file size exceeds the limit of 1 MB. Please choose a smaller file."
+                );
+                form.setFieldValue("image", null); // Reset the field value if the file is too large
+              } else {
+                form.setFieldValue("image", file); // Set the file if it's valid
+              }
+            }}
             {...form.getInputProps("image")}
           />
-          <Box c={"#021526"} pt={80}>
+
+          <Box c={"#021526"} py={80}>
             <Text className="text-[16px] text-[#1A1A1F;] font-[500] ">
               აგენტი
             </Text>
@@ -339,6 +352,11 @@ export default function AddListing() {
                 label: agent.name,
               }))} // Populate agents in the dropdown
               {...form.getInputProps("agent_id")}
+              comboboxProps={{
+                position: "bottom",
+                middlewares: { flip: false, shift: false },
+                transitionProps: { transition: "pop", duration: 200 },
+              }}
             />
           </Box>
           <Box pt={80} className="flex justify-end gap-[15px]">
